@@ -19,9 +19,9 @@ impl<'s> RewriteRules {
     pub fn find_matches<'t>(&self, expr: &'t Expression) -> Vec<(&RewriteRule, Vec<VariableBinding<'t>>)> {
         let mut matches = vec![];
         for rule in &self.rules {
-            let (m, b) = rule.left.matches(expr);
-            if m {
-                matches.push((rule, b))
+            let mut bindings = vec![];
+            if rule.left.matches(expr, &mut bindings) {
+                matches.push((rule, bindings))
             }
         }
         matches

@@ -2,23 +2,22 @@ use crate::{expr::*, symbol_table::SymbolHandle};
 
 pub trait Matches {
 
-    fn matches<'t>(&self, other: &'t Self) -> (bool, Vec<VariableBinding<'t>>);
+    fn matches<'t>(&self, other: &'t Self, bindings: &mut Vec<VariableBinding<'t>>) -> bool;
 
 }
 
 impl Matches for Expression {
 
-    fn matches<'t>(&self, other: &'t Self) -> (bool, Vec<VariableBinding<'t>>) {
+    fn matches<'t>(&self, other: &'t Self, bindings: &mut Vec<VariableBinding<'t>>) -> bool {
         if self.0.len() != other.0.len() {
-            return (false, vec![]);
+            return false;
         }
-        let mut bindings = vec![];
         for (a, b) in self.0.iter().zip(other.0.iter()) {
-            let (m, b) = a.matches(&b);
-            if !m { return (false, vec![]); }
-            bindings.extend(b);
+            if !a.matches(b, bindings) {
+                return false;
+            }
         }
-        (true, bindings)
+        true
     }
 
 }
@@ -30,26 +29,43 @@ pub struct VariableBinding<'t> {
 
 impl Matches for Terminal {
 
-    fn matches<'t>(&self, other: &'t Self) -> (bool, Vec<VariableBinding<'t>>) {
+    fn matches<'t>(&self, other: &'t Self, bindings: &mut Vec<VariableBinding<'t>>) -> bool {
         match self {
             // Symbols must match exactly another symbol
             Terminal::Symbol(a) => {
                 if let Terminal::Symbol(b) = other {
-                    (a == b, vec![])
+                    a == b
                 } else {
-                    (false, vec![])
+                    false
                 }
             },
             // Variables match any terminal
             Terminal::Variable(v) => {
-                (true, vec![VariableBinding { var: *v, expr: other }])
+                
+                // Except when this variable has already been bound!
+                // In this case, the other expression must *equal* the bound
+                // expression exactly.
+                if let Some(binding) = bindings.iter().find(|b| b.var == *v) {
+                    return binding.expr == other;
+                }
+
+                // Additionally, we must verify that the other expression
+                // has not already matched another variable.
+                // This enforces that variables of two different names e.g. $x and $y
+                // match distinct subexpressions.
+                if bindings.iter().any(|b| b.expr == other) {
+                    return false;
+                }
+
+                bindings.push(VariableBinding { var: *v, expr: other });
+                true
             },
             // Subexpressions in both parens must match
             Terminal::Parentheses(a) => {
                 if let Terminal::Parentheses(b) = other {
-                    a.matches(b)
+                    a.matches(b, bindings)
                 } else {
-                    (false, vec![])
+                    false
                 }
             }
         }

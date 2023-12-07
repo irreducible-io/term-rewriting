@@ -1,0 +1,22 @@
+
+// If we have a variable appear twice on the left,
+// both instances must be the exact same expression tree
+// in order to produce a match
+$x = $x -> true
+
+// We can test this with an instance of two different symbols
+// This should not rewrite anything
+1 = 0 -> ?
+
+// But this should...
+1 = 1 -> ?
+
+// Similarly, variables of different names should match
+// only distinct expressions
+$x = $y -> false
+
+// This should rewrite to false
+0 = 1 -> ?
+
+// This should rewrite to true
+1 = 1 -> ?
