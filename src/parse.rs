@@ -5,12 +5,14 @@ use crate::{expr::*, symbol_table::SymbolTable};
 pub enum Token {
     Symbol,
     Constant(&'static str),
+    Eof
 }
 
 impl Display for Token {
 
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Token::Eof => write!(f, "<eof>"),
             Token::Symbol => write!(f, "<symbol>"),
             Token::Constant(s) => write!(f, "\"{}\"", s),
         }
@@ -52,9 +54,14 @@ impl Display for ErrorKind {
     }
 }
 
-trait TryParse where Self: Sized {
+pub trait TryParse: Sized {
 
     fn try_parse<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Self>;
+
+    fn parse<'s>(s: &'s str, symbols: &mut SymbolTable) -> Result<Self, ParseError> {
+        let (parsed, _s) = Self::try_parse(s, symbols)?;
+        Ok(parsed)
+    }
 
 }
 
@@ -81,6 +88,13 @@ fn take_const<'s>(s: &'s str, c: &'static str) -> ParseResult<'s, &'s str> {
     Ok((c, &s[c.len()..]))
 }
 
+fn optionally<'s, T>(s: &'s str, res: ParseResult<'s, T>) -> ParseResult<'s, Option<T>> {
+    match res {
+        Ok((t, s)) => Ok((Some(t), s)),
+        Err(_e) => Ok((None, s))
+    }
+}
+
 impl Terminal {
 
     fn try_parse_variable<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Terminal> {
@@ -95,6 +109,9 @@ impl Terminal {
                                                                       || c == ')')?;
         if symbol == "->" {
             return Err(ParseError{ idx: 0, error: ErrorKind::ReservedSymbol("->") });
+        }
+        if symbol == "//" {
+            return Err(ParseError { idx: 0, error: ErrorKind::ReservedSymbol("//") });
         }
         Ok((Terminal::Symbol(symbols.handle(symbol)), s))
     }
@@ -145,13 +162,66 @@ impl TryParse for Expression {
 
 impl Statement {
 
-    pub fn parse<'s>(s: &'s str, symbols: &mut SymbolTable) -> Result<Statement, ParseError> {
+    fn try_parse_rewrite<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Statement> {
         let (left, s) = Expression::try_parse(s, symbols)?;
-        let (_w, s) = take_until(s, |c| !c.is_whitespace()).unwrap_or(("", s));
+        let (_w, s) = optionally(s, take_until(s, |c| !c.is_whitespace()))?;
         let (_arrow, s) = take_const(s, "->")?;
-        let (_w, s) = take_until(s, |c| !c.is_whitespace()).unwrap_or(("", s));
-        let (right, _s) = Expression::try_parse(s, symbols)?;
-        Ok(Statement::Rewrite(left, right))
+        let (_w, s) = optionally(s, take_until(s, |c| !c.is_whitespace()))?;
+        let (right, s) = Expression::try_parse(s, symbols)?;
+        Ok((Statement::Rewrite(left, right), s))
+    }
+
+    fn try_parse_noop<'s>(s: &'s str, _symbols: &mut SymbolTable) -> ParseResult<'s, Statement> {
+        let (_w, s) = optionally(s, take_until(s, |c| !c.is_whitespace()))?;
+        if s.is_empty() || s.starts_with("//") {
+            Ok((Statement::Noop, s))
+        } else {
+            Err(ParseError { idx: 0, error: ErrorKind::ExpectedToken(Token::Eof)})
+        }
+    }
+
+    
+
+}
+
+impl TryParse for Statement {
+
+    fn try_parse<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Self> {
+        Statement::try_parse_noop(s, symbols)
+            .or_else(|_| Statement::try_parse_rewrite(s, symbols))
+    }
+
+}
+
+impl TryParse for Label {
+
+    fn try_parse<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Self> {
+        let (_, s) = take_const(s, "[")?;
+        let (text, s) = take_until(s, |c| c == ']')?;
+        let (_, s) = take_const(s, "]")?;
+        Ok((Label(symbols.handle(text)), s))
+    }
+
+}
+
+impl TryParse for Comment {
+
+    fn try_parse<'s>(s: &'s str, _symbols: &mut SymbolTable) -> ParseResult<'s, Self> {
+        let (_, s) = take_const(s, "//")?;
+        let (_w, s) = optionally(s, take_until(s, |c| !c.is_whitespace()))?;
+        Ok((Comment(s.to_owned()), ""))
+    }
+
+}
+
+impl TryParse for Item {
+
+    fn try_parse<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Self> {
+        let (label, s) = optionally(s, Label::try_parse(s, symbols))?;
+        let (statement, s) = Statement::try_parse(s, symbols)?;
+        let (_w, s) = optionally(s, take_until(s, |c| !c.is_whitespace()))?;
+        let (comment, s) = optionally(s, Comment::try_parse(s, symbols))?;
+        Ok((Item { label, statement, comment }, s))
     }
 
 }

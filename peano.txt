@@ -1,0 +1,18 @@
+
+// We can define addition in terms of the symbol 0
+// and a successor function S
+[define-addition-0] $x + 0 -> $x
+[define-addition-1] $x + (S $y) -> S ($x + $y)
+
+// Add some aliases for the smaller integers
+[define-one]    1 -> S 0
+[define-two]    2 -> S (S 0)
+[define-three]  3 -> S (S (S 0))
+[define-four]   4 -> S (S (S (S 0)))
+[define-five]   5 -> S (S (S (S (S 0))))
+
+// Define a function that doubles a number
+[define-double] double $x -> $x + $x
+
+// Now we can compute 5 * 2
+double 5 -> ?

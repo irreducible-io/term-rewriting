@@ -13,9 +13,36 @@ pub enum Terminal {
 #[derive(Debug, Eq, PartialEq, Clone)]
 pub struct Expression(pub Vec<Terminal>);
 
-#[derive(Debug)]
+#[derive(Debug, Eq, PartialEq, Clone)]
 pub enum Statement {
+    // Define a new rewrite rule
     Rewrite(Expression, Expression),
+    // An empty statement that does nothing
+    Noop
+}
+
+impl Statement {
+
+    pub fn is_noop(&self) -> bool {
+        match self {
+            Statement::Noop => true,
+            _ => false
+        }
+    }
+
+}
+
+#[derive(Debug)]
+pub struct Label(pub SymbolHandle);
+
+#[derive(Debug)]
+pub struct Comment(pub String);
+
+#[derive(Debug)]
+pub struct Item {
+    pub label: Option<Label>,
+    pub comment: Option<Comment>,
+    pub statement: Statement
 }
 
 macro_rules! term {

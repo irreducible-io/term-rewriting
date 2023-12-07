@@ -44,7 +44,10 @@ impl RewriteRule {
 
 pub fn reduce<'s>(expr: &Expression, rules: &RewriteRules) -> Expression {
     let matches = rules.find_matches(expr);
-    if matches.is_empty() { return expr.clone(); }
+    if matches.is_empty() {
+        return expr.clone();
+    }
+    // TODO: How to handle case when multiple rules apply?
     let (rule, bindings) = &matches[0];
     return rule.right.interpolate(&bindings);
 }
