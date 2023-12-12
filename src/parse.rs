@@ -99,8 +99,10 @@ impl Terminal {
 
     fn try_parse_variable<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Terminal> {
         let (_d, s) = take_const(s, "$")?;
+        let (distinct, s) = optionally(s, take_const(s, "$"))?;
         let (n, s) = take_until(s, |c| !c.is_alphanumeric())?;
-        Ok((Terminal::Variable(symbols.handle(n)), s))
+        let kind = if distinct.is_some() { VariableKind::Distinct } else { VariableKind::Any };
+        Ok((Terminal::Variable(symbols.handle(n), kind), s))
     }
 
     fn try_parse_symbol<'s>(s: &'s str, symbols: &mut SymbolTable) -> ParseResult<'s, Terminal> {

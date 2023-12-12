@@ -1,0 +1,5 @@
+
+$x I -> $x I U
+M $x -> M $x $x
+$x I I I $y -> $x U $y
+$x U U $y -> $x $y

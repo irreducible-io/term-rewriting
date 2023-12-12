@@ -3,17 +3,7 @@ use std::error::Error;
 use std::env::args;
 use std::fs;
 
-#[macro_use]
-mod expr;
-mod parse;
-mod unparse;
-mod matches;
-mod reduce;
-mod repl;
-mod symbol_table;
-mod interpolate;
-
-use repl::*;
+use peano::repl::*;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let f = args().nth(1);

@@ -11,13 +11,13 @@ impl Interpolate for Terminal {
         match self {
             Terminal::Parentheses(e) => Terminal::Parentheses(e.interpolate(bindings)),
             Terminal::Symbol(s) => Terminal::Symbol(*s),
-            Terminal::Variable(v) => {
+            Terminal::Variable(v, k) => {
                 for b in bindings {
                     if b.var == *v {
                         return b.expr.clone()
                     }
                 }
-                Terminal::Variable(*v)
+                Terminal::Variable(*v, *k)
             }
         }
     }

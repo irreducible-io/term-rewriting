@@ -1,9 +1,15 @@
 use crate::symbol_table::SymbolHandle;
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug, Eq, PartialEq, Clone, Copy)]
+pub enum VariableKind {
+    Any,
+    Distinct
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
 pub enum Terminal {
     // $n $x $abc
-    Variable(SymbolHandle),
+    Variable(SymbolHandle, VariableKind),
     // 0 1 + abc x
     Symbol(SymbolHandle),
     // (a + b) / 4
@@ -50,13 +56,13 @@ macro_rules! term {
         Terminal::Parentheses( expr!($sym $($t)*) )
     };
     ($sym:ident [$s:ident]) => {
-        Terminal::Variable($sym.handle(stringify!($s)))
+        Terminal::Variable($sym.handle(stringify!($s)), VariableKind::Any)
     };
     ($sym:ident [$s:literal]) => {
-        Terminal::Variable($sym.handle(&format!("{}", $s)))
+        Terminal::Variable($sym.handle(&format!("{}", $s)), VariableKind::Any)
     };
     ($sym:ident [$s:tt]) => {
-        Terminal::Variable($sym.handle(stringify!($s)))
+        Terminal::Variable($sym.handle(stringify!($s)), VariableKind::Any)
     };
     ($sym:ident $s:ident) => {
         Terminal::Symbol($sym.handle(stringify!($s)))
@@ -84,8 +90,8 @@ mod tests {
     #[test]
     fn test_term_macro_var() {
         let mut symbols = SymbolTable::new();
-        assert_eq!(term!(symbols [x]), Terminal::Variable(symbols.handle("x")));
-        assert_eq!(term!(symbols ["with space"]), Terminal::Variable(symbols.handle("with space")));
+        assert_eq!(term!(symbols [x]), Terminal::Variable(symbols.handle("x"), VariableKind::Any));
+        assert_eq!(term!(symbols ["with space"]), Terminal::Variable(symbols.handle("with space"), VariableKind::Any));
     }
 
     #[test]
@@ -119,9 +125,9 @@ mod tests {
             expr!(symbols ([x] + [y]) / 2),
             Expression(vec![
                 Terminal::Parentheses(Expression(vec![
-                    Terminal::Variable(symbols.handle("x")),
+                    Terminal::Variable(symbols.handle("x"), VariableKind::Any),
                     Terminal::Symbol(symbols.handle("+")),
-                    Terminal::Variable(symbols.handle("y"))
+                    Terminal::Variable(symbols.handle("y"), VariableKind::Any)
                 ])),
                 Terminal::Symbol(symbols.handle("/")),
                 Terminal::Symbol(symbols.handle("2"))

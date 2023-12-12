@@ -1,0 +1,24 @@
+
+not true -> false
+not false -> true
+
+true or $x -> true
+false or $x -> $x
+
+true and $x -> $x
+false and $x -> false
+
+if true then $x -> $x
+if false then $x -> false
+if true then $x else $y -> $x
+if false then $x else $y -> $y
+
+not (not $x) -> $x
+not ($x and $y) -> (not $x) or (not $y)
+not ($x or $y) -> (not $x) and (not $y)
+($x and $y) or $z -> ($x or $z) and ($y or $z)
+$x or ($y and $z) -> ($x or $y) and ($x or $z)
+
+$x mortal? -> if ($x man?) then true
+socrates man? -> true
+socrates mortal? -> ?

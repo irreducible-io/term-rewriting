@@ -171,10 +171,19 @@ impl Display for Terminal {
         match self {
             Terminal::Parentheses(e) => write!(f, "({})", e),
             Terminal::Symbol(s) => write!(f, "{}", s),
-            Terminal::Variable(v) => write!(f, "${}", v)
+            Terminal::Variable(v, k) => write!(f, "{}{}", k, v)
         }
     }
 
+}
+
+impl Display for VariableKind {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            VariableKind::Any => write!(f, "$"),
+            VariableKind::Distinct => write!(f, "$$")
+        }
+    }
 }
 
 impl Terminal {
@@ -196,7 +205,7 @@ impl<'s> Display for BoundTerminal<'s> {
         match &self.terminal {
             Terminal::Parentheses(e) => write!(f, "({})", e.bind(self.symbols)),
             Terminal::Symbol(s) => write!(f, "{}", self.symbols.lookup(*s)),
-            Terminal::Variable(v) => write!(f, "${}", self.symbols.lookup(*v))
+            Terminal::Variable(v, k) => write!(f, "{}{}", k, self.symbols.lookup(*v))
         }
     }
 }

@@ -40,7 +40,7 @@ impl Matches for Terminal {
                 }
             },
             // Variables match any terminal
-            Terminal::Variable(v) => {
+            Terminal::Variable(v, k) => {
                 
                 // Except when this variable has already been bound!
                 // In this case, the other expression must *equal* the bound
@@ -49,14 +49,16 @@ impl Matches for Terminal {
                     return binding.expr == other;
                 }
 
-                // Additionally, we must verify that the other expression
+                // Additionally, if this variable is distinct, we must verify that the other expression
                 // has not already matched another variable.
-                // This enforces that variables of two different names e.g. $x and $y
-                // match distinct subexpressions.
-                if bindings.iter().any(|b| b.expr == other) {
-                    return false;
+                // This enforces that $x and the distinct variable $$y
+                // only match distinct subexpressions.
+                if *k == VariableKind::Distinct {
+                    if bindings.iter().any(|b| b.expr == other) {
+                        return false;
+                    }
                 }
-
+                
                 bindings.push(VariableBinding { var: *v, expr: other });
                 true
             },

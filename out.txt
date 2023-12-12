@@ -1,0 +1,173 @@
+<LOAD> 'peano.txt'
+
+true and $x -> $x
+false and $x -> false
+
+true or $x -> true
+false or $x -> $x
+
+if true then $x -> $x
+if false then $x -> false
+
+not true -> false
+not false -> true
+
+// We can define a number as either 0
+// or the result of a successor function S
+[define-one] 1 -> S 0
+[define-two] 2 -> S (S 0)
+[define-three] 3 -> S (S (S 0))
+[define-four] 4 -> S (S (S (S 0)))
+[define-five] 5 -> S (S (S (S (S 0))))
+
+// We can define addition with the repeated
+// application of the successor function S
+[define-addition-0] $x + 0 -> $x
+[define-addition-1] $x + (S $y) -> S ($x + $y)
+
+// Likewise we can define multiplication as
+// the repeated application of addition
+[define-multiplication-0] $x * 0 -> 0
+[define-multiplication-1] $x * (S $y) -> $x + ($x * $y)
+
+// Let's use a distinct variable to define equality
+[define-equals-0] $x = $x -> true // Any expression equal to itself is true
+[define-equals-1] $x = $$y -> false // Any two distinct expressions are not equal
+if ($x = $y) then ($y = $x) -> true
+if (($x = $y) and ($y = $z)) then ($x = $z) -> true
+
+// Now we can check if x * 2 is equal to x + x
+(x * 2) = (x + x) -> ?
+	(x * (S (S 0))) = (x + x)
+	(x + (x * (S 0))) = (x + x)
+	(x + (x + (x * 0))) = (x + x)
+	(x + (x + 0)) = (x + x)
+	(x + x) = (x + x)
+	true
+
+// To prove that addition is commutative we may need the concept of a set
+((S x) + (S y)) = ((S y) + (S x)) -> ?
+	(S ((S x) + y)) = ((S y) + (S x))
+	(S ((S x) + y)) = (S ((S y) + x))
+	false
+(5 + 5) * 5 -> ?
+	((S (S (S (S (S 0))))) + 5) * 5
+	((S (S (S (S (S 0))))) + (S (S (S (S (S 0)))))) * 5
+	(S ((S (S (S (S (S 0))))) + (S (S (S (S 0)))))) * 5
+	(S (S ((S (S (S (S (S 0))))) + (S (S (S 0)))))) * 5
+	(S (S (S ((S (S (S (S (S 0))))) + (S (S 0)))))) * 5
+	(S (S (S (S ((S (S (S (S (S 0))))) + (S 0)))))) * 5
+	(S (S (S (S (S ((S (S (S (S (S 0))))) + 0)))))) * 5
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) * 5
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) * (S (S (S (S (S 0)))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) * (S (S (S (S 0)))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) * (S (S (S 0)))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) * (S (S 0)))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) * (S 0)))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) * 0)))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + 0))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + 0)))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + 0))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + 0)))))))))))))))))))))))))))))))
+	(S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + (S 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S ((S (S (S (S (S (S (S (S (S (S 0)))))))))) + 0))))))))))))))))))))))))))))))))))))))))
+	S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S (S 0)))))))))))))))))))))))))))))))))))))))))))))))))
