@@ -13,5 +13,5 @@ cargo build --release
 
 Build the WASM package
 ```shell
-wasm-pack build
+wasm-pack build --target web
 ```

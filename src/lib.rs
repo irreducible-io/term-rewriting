@@ -4,6 +4,7 @@ use parse::TryParse;
 use reduce::{RewriteRules, RewriteRule};
 use symbol_table::SymbolTable;
 use wasm_bindgen::prelude::*;
+use std::sync::Mutex;
 
 #[macro_use]
 pub mod expr;
@@ -22,7 +23,7 @@ pub mod interpolate;
 
 #[wasm_bindgen]
 pub struct TrsHandle {
-    symbols: SymbolTable,
+    symbols: Mutex<SymbolTable>,
     rules: RewriteRules,
 }
 
@@ -46,16 +47,17 @@ pub fn trs_init(src: &str) -> TrsHandle {
             }
         }
     }
-    TrsHandle { symbols, rules }
+    TrsHandle { symbols: Mutex::new(symbols), rules }
 }
 
 #[wasm_bindgen]
-pub fn trs_reduce_once(s: &str, trs: &mut TrsHandle) -> String {
-    let result = Expression::parse(s, &mut trs.symbols);
+pub fn trs_reduce_once(s: &str, trs: &TrsHandle) -> String {
+    let mut symbols = trs.symbols.lock().unwrap();
+    let result = Expression::parse(s, &mut symbols);
     match result {
         Ok(mut expr) => {
-            expr.reduce_once(&mut trs.rules);
-            format!("{}", expr.bind(&trs.symbols))
+            expr.reduce_once(&trs.rules);
+            format!("{}", expr.bind(&symbols))
         },
         Err(e) => {
             error(&format!("{}", e));
