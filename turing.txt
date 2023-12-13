@@ -1,0 +1,25 @@
+
+new_tape -> TAPE (() 0 ())
+
+write $x (TAPE ($l $h $r)) -> TAPE ($l $x $r)
+
+left (TAPE (() $h $r)) -> TAPE (() 0 ($h $r))
+left (TAPE (($n $l) $h $r)) -> TAPE ($l $n ($h $r))
+
+right (TAPE ($l $h ())) -> TAPE (($h $l) 0 ())
+right (TAPE ($l $h ($n $r))) -> TAPE (($h $l) $n $r)
+
+(TAPE $t) (A $n) -> (right (write a (TAPE $t))) (B $n)
+(TAPE $t) (B $n) -> (right (write b (TAPE $t))) (C $n)
+(TAPE $t) (C (S $n)) -> (right (write c (TAPE $t))) (A $n)
+(TAPE $t) (C 0) -> (right (write c (TAPE $t))) DONE
+(TAPE $t) DONE -> $t
+
+1 -> S 0
+2 -> S (S 0)
+3 -> S (S (S 0))
+4 -> S (S (S (S 0)))
+
+abcs $n -> new_tape (A $n)
+
+abcs 2 -> ?
